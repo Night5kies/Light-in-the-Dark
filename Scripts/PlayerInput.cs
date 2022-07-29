@@ -64,18 +64,18 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
-                    ""name"": ""Attack"",
+                    ""name"": ""Block"",
                     ""type"": ""Button"",
-                    ""id"": ""a4ccbcf1-a1e1-475b-b93c-76229cb0cf76"",
+                    ""id"": ""eaf579d7-cc5b-444a-bf5f-e093e91b95ef"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
                 },
                 {
-                    ""name"": ""Block"",
+                    ""name"": ""Attack"",
                     ""type"": ""Button"",
-                    ""id"": ""97867cba-e84a-4ca7-b4eb-37b84a453f3a"",
+                    ""id"": ""3c63ec28-91a9-4557-98f0-2b2b97925a48"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
                     ""interactions"": """",
@@ -173,23 +173,23 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""717fd446-426a-45c3-b8a7-2cf6ef670cf6"",
-                    ""path"": ""<Mouse>/leftButton"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Attack"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""92a3576d-7694-469f-b718-7fe2b9ca38ca"",
+                    ""id"": ""1cfef1e9-c18a-479a-b17f-ad9ff6f5c573"",
                     ""path"": ""<Mouse>/rightButton"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
                     ""action"": ""Block"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""6d88fa55-811e-470d-b1f2-536dcaba5bee"",
+                    ""path"": ""<Mouse>/leftButton"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Attack"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -204,8 +204,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         m_PlayerControls_Run = m_PlayerControls.FindAction("Run", throwIfNotFound: true);
         m_PlayerControls_Jump = m_PlayerControls.FindAction("Jump", throwIfNotFound: true);
         m_PlayerControls_Perspective = m_PlayerControls.FindAction("Perspective", throwIfNotFound: true);
-        m_PlayerControls_Attack = m_PlayerControls.FindAction("Attack", throwIfNotFound: true);
         m_PlayerControls_Block = m_PlayerControls.FindAction("Block", throwIfNotFound: true);
+        m_PlayerControls_Attack = m_PlayerControls.FindAction("Attack", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -269,8 +269,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     private readonly InputAction m_PlayerControls_Run;
     private readonly InputAction m_PlayerControls_Jump;
     private readonly InputAction m_PlayerControls_Perspective;
-    private readonly InputAction m_PlayerControls_Attack;
     private readonly InputAction m_PlayerControls_Block;
+    private readonly InputAction m_PlayerControls_Attack;
     public struct PlayerControlsActions
     {
         private @PlayerInput m_Wrapper;
@@ -279,8 +279,8 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         public InputAction @Run => m_Wrapper.m_PlayerControls_Run;
         public InputAction @Jump => m_Wrapper.m_PlayerControls_Jump;
         public InputAction @Perspective => m_Wrapper.m_PlayerControls_Perspective;
-        public InputAction @Attack => m_Wrapper.m_PlayerControls_Attack;
         public InputAction @Block => m_Wrapper.m_PlayerControls_Block;
+        public InputAction @Attack => m_Wrapper.m_PlayerControls_Attack;
         public InputActionMap Get() { return m_Wrapper.m_PlayerControls; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -302,12 +302,12 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Perspective.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPerspective;
                 @Perspective.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPerspective;
                 @Perspective.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnPerspective;
-                @Attack.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
-                @Attack.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
-                @Attack.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
                 @Block.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnBlock;
                 @Block.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnBlock;
                 @Block.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnBlock;
+                @Attack.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
+                @Attack.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
+                @Attack.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnAttack;
             }
             m_Wrapper.m_PlayerControlsActionsCallbackInterface = instance;
             if (instance != null)
@@ -324,12 +324,12 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Perspective.started += instance.OnPerspective;
                 @Perspective.performed += instance.OnPerspective;
                 @Perspective.canceled += instance.OnPerspective;
-                @Attack.started += instance.OnAttack;
-                @Attack.performed += instance.OnAttack;
-                @Attack.canceled += instance.OnAttack;
                 @Block.started += instance.OnBlock;
                 @Block.performed += instance.OnBlock;
                 @Block.canceled += instance.OnBlock;
+                @Attack.started += instance.OnAttack;
+                @Attack.performed += instance.OnAttack;
+                @Attack.canceled += instance.OnAttack;
             }
         }
     }
@@ -340,7 +340,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         void OnRun(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnPerspective(InputAction.CallbackContext context);
-        void OnAttack(InputAction.CallbackContext context);
         void OnBlock(InputAction.CallbackContext context);
+        void OnAttack(InputAction.CallbackContext context);
     }
 }

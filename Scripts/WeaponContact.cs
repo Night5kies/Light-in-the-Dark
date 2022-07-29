@@ -28,7 +28,7 @@ public class WeaponContact : MonoBehaviour
     {
         if (collision.gameObject.tag == "enemy" && animator.GetBool("isAttacking")){
             EntityHealth enemyScript = collision.gameObject.GetComponent<EntityHealth>();
-            enemyScript.changeHealth(0-damage);
+            enemyScript.changeHealth(-damage);
         }
     }
 }

@@ -26,7 +26,7 @@ public class EntityHealth : MonoBehaviour
 
     public float changeHealth ( float change)
     {
-        Debug.Log("Damage dealt:" + (0-change));
+        Debug.Log("Damage dealt:" + (-change));
         Debug.Log("Health remaining: " + (health + change));
         return health += change; 
     }
