@@ -24,6 +24,9 @@ public class PlayerController : MonoBehaviour
     float turnTime;
 
     float yVel;
+    
+    Animator myAnimator;
+    AnimatorClipInfo[] myAnimatorClipInfo;
 
     bool movementInputGiven;
 
@@ -31,6 +34,9 @@ public class PlayerController : MonoBehaviour
     bool running;
     bool jumpPressed;
     bool jumping;
+    bool leftClick;
+    bool leftUnclick;
+    bool rightClick;
 
     Vector2 movementInput;
     Vector3 desiredMovement;
@@ -57,6 +63,15 @@ public class PlayerController : MonoBehaviour
         playerInput.PlayerControls.Jump.started += inp => { jumpPressed = inp.ReadValueAsButton(); };
         playerInput.PlayerControls.Jump.canceled += inp => { jumpPressed = inp.ReadValueAsButton(); };
 
+        playerInput.PlayerControls.Attack.started += inp => { leftClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Attack.canceled += inp => { leftClick = inp.ReadValueAsButton(); };
+
+        playerInput.PlayerControls.Block.started += inp => { rightClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Block.canceled += inp => { rightClick = inp.ReadValueAsButton(); };
+
+
+        // set the variables
+        //framesPassed = 18; // chose a random number for now
     }
 
     // handler function to set the player input values
@@ -65,7 +80,6 @@ public class PlayerController : MonoBehaviour
         movementInput = inp.ReadValue<Vector2>();
         movementInputGiven = movementInput.x != 0f || movementInput.y != 0f;
     }
-
 
 
     void Update()
@@ -128,6 +142,34 @@ public class PlayerController : MonoBehaviour
         {
             jumping = false;
             animator.SetBool("isJumping", false);
+        }
+
+        //ATTACKING
+        if (leftClick)
+        {
+            animator.SetBool("isAttacking", true);
+            Debug.Log("isAttacking, left mouse button clicked");
+        }
+
+        //Blocking
+        if (rightClick)
+        {
+            animator.SetBool("isBlocking", true);
+            Debug.Log("is Blocking, Right mouseButton held down");
+
+            //Trying to make the Blocking freeze frame on the last one so its a continuous block
+            /*myAnimator = GetComponent<Animator>();
+            myAnimatorClipInfo = myAnimator.GetCurrentAnimatorClipInfo(0);
+            Debug.Log(myAnimator.GetCurrentAnimatorClipInfo(0));
+
+            if( ( int ) (GetComponent<Animation>()[myAnimtor.clip.name]..time * 100) == 99)
+            {
+                
+                myAnimatorClipInfo.Animation.speed = 0;
+            }*/
+        }else{
+            //AnimationState.speed = 1;
+            animator.SetBool("isBlocking", false);
         }
         
 
