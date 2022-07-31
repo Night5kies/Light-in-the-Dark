@@ -31,6 +31,10 @@ public class PlayerController : MonoBehaviour
     bool running;
     bool jumpPressed;
     bool jumping;
+    bool leftClick;
+    bool rightClick;
+    bool isFixed;
+
 
     Vector2 movementInput;
     Vector3 desiredMovement;
@@ -57,6 +61,12 @@ public class PlayerController : MonoBehaviour
         playerInput.PlayerControls.Jump.started += inp => { jumpPressed = inp.ReadValueAsButton(); };
         playerInput.PlayerControls.Jump.canceled += inp => { jumpPressed = inp.ReadValueAsButton(); };
 
+        playerInput.PlayerControls.Attack.started += inp => { leftClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Attack.canceled += inp => { leftClick = inp.ReadValueAsButton(); };
+
+        playerInput.PlayerControls.Block.started += inp => { rightClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Block.canceled += inp => { rightClick = inp.ReadValueAsButton(); };
+
     }
 
     // handler function to set the player input values
@@ -70,30 +80,78 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        //ATTACKING AND BLOCKING
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Raise Shield") || animator.GetCurrentAnimatorStateInfo(0).IsName("Lower Shield"))
+        {
+            isFixed = true;
+            if (rightClick)
+            {
+                animator.SetBool("isBlocking", true);
+            }
+            else
+            {
+                animator.SetBool("isBlocking", false);
+            }
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Sword Slash"))
+        {
+            isFixed = true;
+        }
+
+        else
+        {
+            isFixed = false;
+            if (leftClick)
+            {
+                animator.SetBool("isAttacking", true);
+            }
+            else
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            if (rightClick)
+            {
+                animator.SetBool("isBlocking", true);
+            }
+            else
+            {
+                animator.SetBool("isBlocking", false);
+            }
+
+
+            //ROTATION
+            if (transform.eulerAngles.y != targetAngle)
+            {
+                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnTime);
+                transform.rotation = Quaternion.Euler(0, angle, 0);
+            }
+
+
+        }
+
+
         desiredMovement.x = 0;
         desiredMovement.z = 0;
         yVel = desiredMovement.y;
-        
+
 
         //MOVEMENT
-        if (movementInputGiven)
+        if (movementInputGiven && !isFixed)
         {
             targetAngle = Mathf.Atan2(movementInput.x, movementInput.y) * Mathf.Rad2Deg + cam.transform.eulerAngles.y;
-
+            animator.SetBool("isWalking", true);
             if (running)
             {
                 desiredMovement = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward * runSpeed;
                 animator.SetBool("isRunning", true);
-                animator.SetBool("isWalking", false);
             }
             else
             {
                 desiredMovement = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward * walkSpeed;
                 animator.SetBool("isRunning", false);
-                animator.SetBool("isWalking", true);
             }
 
-            //turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
+            turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
         }
         else
         {
@@ -102,10 +160,13 @@ public class PlayerController : MonoBehaviour
         }
         desiredMovement.y = yVel;
 
-        //GRAVITY
-        
 
         characterController.Move(desiredMovement * Time.deltaTime);
+
+
+
+
+        //GRAVITY
         grounded = characterController.isGrounded;
 
         if (grounded)
@@ -129,16 +190,6 @@ public class PlayerController : MonoBehaviour
             jumping = false;
             animator.SetBool("isJumping", false);
         }
-        
-
-        //ROTATION
-        if (transform.eulerAngles.y != targetAngle)
-        {
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnTime);
-            transform.rotation = Quaternion.Euler(0, angle, 0);
-        }
-
-
     }
 
     void OnEnable()
