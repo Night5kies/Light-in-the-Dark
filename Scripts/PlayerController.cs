@@ -37,9 +37,12 @@ public class PlayerController : MonoBehaviour
     bool leftClick;
     bool leftUnclick;
     bool rightClick;
+    bool isFixed = false;
 
     Vector2 movementInput;
     Vector3 desiredMovement;
+
+
 
 
     
@@ -84,27 +87,75 @@ public class PlayerController : MonoBehaviour
 
     void Update()
     {
+        //ATTACKING AND BLOCKING
+        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Raise Shield") || animator.GetCurrentAnimatorStateInfo(0).IsName("Lower Shield"))
+        {
+            isFixed = true;
+            if (rightClick)
+            {
+                animator.SetBool("isBlocking", true);
+            }
+            else
+            {
+                animator.SetBool("isBlocking", false);
+            }
+        }
+        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Sword Slash"))
+        {
+            isFixed = true;
+        }
+
+        else
+        {
+            isFixed = false;
+            if (leftClick)
+            {
+                animator.SetBool("isAttacking", true);
+            }
+            else
+            {
+                animator.SetBool("isAttacking", false);
+            }
+            if (rightClick)
+            {
+                animator.SetBool("isBlocking", true);
+            }
+            else
+            {
+                animator.SetBool("isBlocking", false);
+            }
+
+
+            //ROTATION
+            if (transform.eulerAngles.y != targetAngle)
+            {
+                float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnTime);
+                transform.rotation = Quaternion.Euler(0, angle, 0);
+            }
+
+
+        }
+
+
         desiredMovement.x = 0;
         desiredMovement.z = 0;
         yVel = desiredMovement.y;
-        
+
 
         //MOVEMENT
-        if (movementInputGiven)
+        if (movementInputGiven && !isFixed)
         {
             targetAngle = Mathf.Atan2(movementInput.x, movementInput.y) * Mathf.Rad2Deg + cam.transform.eulerAngles.y;
-
+            animator.SetBool("isWalking", true);
             if (running)
             {
                 desiredMovement = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward * runSpeed;
                 animator.SetBool("isRunning", true);
-                animator.SetBool("isWalking", false);
             }
             else
             {
                 desiredMovement = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward * walkSpeed;
                 animator.SetBool("isRunning", false);
-                animator.SetBool("isWalking", true);
             }
 
             turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
@@ -116,10 +167,13 @@ public class PlayerController : MonoBehaviour
         }
         desiredMovement.y = yVel;
 
-        //GRAVITY
-        
 
         characterController.Move(desiredMovement * Time.deltaTime);
+
+
+
+
+        //GRAVITY
         grounded = characterController.isGrounded;
 
         if (grounded)
@@ -144,41 +198,12 @@ public class PlayerController : MonoBehaviour
             animator.SetBool("isJumping", false);
         }
 
-        //ATTACKING
-        if (leftClick)
-        {
-            animator.SetBool("isAttacking", true);
-            Debug.Log("isAttacking, left mouse button clicked");
-        }
 
-        //Blocking
-        if (rightClick)
-        {
-            animator.SetBool("isBlocking", true);
-            Debug.Log("is Blocking, Right mouseButton held down");
-
-            //Trying to make the Blocking freeze frame on the last one so its a continuous block
-            /*myAnimator = GetComponent<Animator>();
-            myAnimatorClipInfo = myAnimator.GetCurrentAnimatorClipInfo(0);
-            Debug.Log(myAnimator.GetCurrentAnimatorClipInfo(0));
-
-            if( ( int ) (GetComponent<Animation>()[myAnimtor.clip.name]..time * 100) == 99)
-            {
-                
-                myAnimatorClipInfo.Animation.speed = 0;
-            }*/
-        }else{
-            //AnimationState.speed = 1;
-            animator.SetBool("isBlocking", false);
-        }
         
 
-        //ROTATION
-        if (transform.eulerAngles.y != targetAngle)
-        {
-            float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnTime);
-            transform.rotation = Quaternion.Euler(0, angle, 0);
-        }
+
+        
+
 
 
     }

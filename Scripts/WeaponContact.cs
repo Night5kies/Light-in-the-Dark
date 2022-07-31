@@ -8,6 +8,7 @@ public class WeaponContact : MonoBehaviour
     CharacterController characterController;
     PlayerInput playerInput;
     Animator animator;
+    Animator enemyState;
 
     public float damage;
     
@@ -28,7 +29,11 @@ public class WeaponContact : MonoBehaviour
     {
         if (collision.gameObject.tag == "enemy" && animator.GetBool("isAttacking")){
             EntityHealth enemyScript = collision.gameObject.GetComponent<EntityHealth>();
-            enemyScript.changeHealth(-damage);
+            enemyState = collision.gameObject.GetComponent<Animator>();
+            if (!enemyState.GetBool("isBlocking"))
+            {
+                enemyScript.changeHealth(0 - damage);
+            }
         }
     }
 }
