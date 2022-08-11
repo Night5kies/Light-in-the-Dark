@@ -35,7 +35,7 @@ public class PlayerController : MonoBehaviour
     bool leftClick;
     bool rightClick;
     bool isFixed;
-
+    bool dodgePressed;
 
     Vector2 movementInput;
     Vector3 desiredMovement;
@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour
 
     public bool blocking;
     public float blockAngle;
+    float angleToEnemy;
 
     public float health;
     public float maxHealth;
@@ -64,7 +65,10 @@ public class PlayerController : MonoBehaviour
         playerInput.PlayerControls.Movement.started += AssignMovementInput;
         playerInput.PlayerControls.Movement.canceled += AssignMovementInput;
         playerInput.PlayerControls.Movement.performed += AssignMovementInput;
-        
+
+        playerInput.PlayerControls.Dodge.started += inp => { dodgePressed = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Dodge.canceled += inp => { dodgePressed = inp.ReadValueAsButton(); };
+
         playerInput.PlayerControls.Run.started += inp => { running = inp.ReadValueAsButton(); };
         playerInput.PlayerControls.Run.canceled += inp => { running = inp.ReadValueAsButton(); };
 
@@ -76,6 +80,7 @@ public class PlayerController : MonoBehaviour
 
         playerInput.PlayerControls.Block.started += inp => { rightClick = inp.ReadValueAsButton(); };
         playerInput.PlayerControls.Block.canceled += inp => { rightClick = inp.ReadValueAsButton(); };
+
 
     }
 
@@ -149,9 +154,16 @@ public class PlayerController : MonoBehaviour
         //MOVEMENT
         if (!isFixed)
         {
+            if (dodgePressed)
+            {
+                animator.SetTrigger("Dodge");
+                isFixed = true;
+            }
             if (movementInputGiven)
             {
                 targetAngle = Mathf.Atan2(movementInput.x, movementInput.y) * Mathf.Rad2Deg + cam.transform.eulerAngles.y;
+
+                turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
                 animator.SetBool("isWalking", true);
                 if (running)
                 {
@@ -163,8 +175,6 @@ public class PlayerController : MonoBehaviour
                     desiredMovement = Quaternion.Euler(0, targetAngle, 0) * Vector3.forward * walkSpeed;
                     animator.SetBool("isRunning", false);
                 }
-
-                turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
             }
             else
             {
@@ -224,6 +234,12 @@ public class PlayerController : MonoBehaviour
 
     public void damaged(float damage, Vector3 location)
     {
+        angleToEnemy = Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg;
+        if (angleToEnemy < 0)
+        {
+            angleToEnemy += 360;
+        }
+        Debug.Log(angleToEnemy + ", " + transform.eulerAngles.y);
         if (!blocking || !(Mathf.Abs(transform.eulerAngles.y-(Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg)) <= blockAngle))
         {
             health -= damage;

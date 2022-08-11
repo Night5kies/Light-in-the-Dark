@@ -37,6 +37,15 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""initialStateCheck"": true
                 },
                 {
+                    ""name"": ""Dodge"",
+                    ""type"": ""Button"",
+                    ""id"": ""b7ca309a-fc0c-48a7-bb9c-214d426fa0ec"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
                     ""name"": ""Run"",
                     ""type"": ""Button"",
                     ""id"": ""3ddd8a50-799a-4a6f-874f-d5d39e457169"",
@@ -51,7 +60,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""id"": ""7346d967-72e1-40c1-a092-e6d2b07c3c27"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -69,7 +78,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""id"": ""c4d2648b-ee58-4c57-9a5d-054f1520222e"",
                     ""expectedControlType"": ""Button"",
                     ""processors"": """",
-                    ""interactions"": """",
+                    ""interactions"": ""Press"",
                     ""initialStateCheck"": false
                 },
                 {
@@ -141,7 +150,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""d43f02c1-7b7e-4c3f-934c-bb21d22aadf7"",
-                    ""path"": ""<Keyboard>/shift"",
+                    ""path"": ""<Keyboard>/leftShift"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -192,6 +201,17 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                     ""action"": ""Block"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""eacdccde-ad49-4f59-b6f4-5a286dfbe8b6"",
+                    ""path"": ""<Keyboard>/f"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Dodge"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -201,6 +221,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         // PlayerControls
         m_PlayerControls = asset.FindActionMap("PlayerControls", throwIfNotFound: true);
         m_PlayerControls_Movement = m_PlayerControls.FindAction("Movement", throwIfNotFound: true);
+        m_PlayerControls_Dodge = m_PlayerControls.FindAction("Dodge", throwIfNotFound: true);
         m_PlayerControls_Run = m_PlayerControls.FindAction("Run", throwIfNotFound: true);
         m_PlayerControls_Jump = m_PlayerControls.FindAction("Jump", throwIfNotFound: true);
         m_PlayerControls_Perspective = m_PlayerControls.FindAction("Perspective", throwIfNotFound: true);
@@ -266,6 +287,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     private readonly InputActionMap m_PlayerControls;
     private IPlayerControlsActions m_PlayerControlsActionsCallbackInterface;
     private readonly InputAction m_PlayerControls_Movement;
+    private readonly InputAction m_PlayerControls_Dodge;
     private readonly InputAction m_PlayerControls_Run;
     private readonly InputAction m_PlayerControls_Jump;
     private readonly InputAction m_PlayerControls_Perspective;
@@ -276,6 +298,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
         private @PlayerInput m_Wrapper;
         public PlayerControlsActions(@PlayerInput wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_PlayerControls_Movement;
+        public InputAction @Dodge => m_Wrapper.m_PlayerControls_Dodge;
         public InputAction @Run => m_Wrapper.m_PlayerControls_Run;
         public InputAction @Jump => m_Wrapper.m_PlayerControls_Jump;
         public InputAction @Perspective => m_Wrapper.m_PlayerControls_Perspective;
@@ -293,6 +316,9 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Movement.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMovement;
                 @Movement.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMovement;
                 @Movement.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnMovement;
+                @Dodge.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnDodge;
+                @Dodge.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnDodge;
+                @Dodge.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnDodge;
                 @Run.started -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnRun;
                 @Run.performed -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnRun;
                 @Run.canceled -= m_Wrapper.m_PlayerControlsActionsCallbackInterface.OnRun;
@@ -315,6 +341,9 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
                 @Movement.started += instance.OnMovement;
                 @Movement.performed += instance.OnMovement;
                 @Movement.canceled += instance.OnMovement;
+                @Dodge.started += instance.OnDodge;
+                @Dodge.performed += instance.OnDodge;
+                @Dodge.canceled += instance.OnDodge;
                 @Run.started += instance.OnRun;
                 @Run.performed += instance.OnRun;
                 @Run.canceled += instance.OnRun;
@@ -337,6 +366,7 @@ public partial class @PlayerInput : IInputActionCollection2, IDisposable
     public interface IPlayerControlsActions
     {
         void OnMovement(InputAction.CallbackContext context);
+        void OnDodge(InputAction.CallbackContext context);
         void OnRun(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnPerspective(InputAction.CallbackContext context);

@@ -90,7 +90,10 @@ public class EnemyController : MonoBehaviour
 
     public void hitPlayer()
     {
-        playerController.damaged(attackDamage, transform.position);
+        if (distance <= hitRange && Mathf.Abs(angleToPlayer - transform.eulerAngles.y) <= attackAngle)
+        {
+            playerController.damaged(attackDamage, transform.position);
+        }
     }
 
 

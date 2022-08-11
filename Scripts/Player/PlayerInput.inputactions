@@ -15,6 +15,15 @@
                     "initialStateCheck": true
                 },
                 {
+                    "name": "Dodge",
+                    "type": "Button",
+                    "id": "b7ca309a-fc0c-48a7-bb9c-214d426fa0ec",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
                     "name": "Run",
                     "type": "Button",
                     "id": "3ddd8a50-799a-4a6f-874f-d5d39e457169",
@@ -29,7 +38,7 @@
                     "id": "7346d967-72e1-40c1-a092-e6d2b07c3c27",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 },
                 {
@@ -47,7 +56,7 @@
                     "id": "c4d2648b-ee58-4c57-9a5d-054f1520222e",
                     "expectedControlType": "Button",
                     "processors": "",
-                    "interactions": "",
+                    "interactions": "Press",
                     "initialStateCheck": false
                 },
                 {
@@ -119,7 +128,7 @@
                 {
                     "name": "",
                     "id": "d43f02c1-7b7e-4c3f-934c-bb21d22aadf7",
-                    "path": "<Keyboard>/shift",
+                    "path": "<Keyboard>/leftShift",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -168,6 +177,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "Block",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "eacdccde-ad49-4f59-b6f4-5a286dfbe8b6",
+                    "path": "<Keyboard>/f",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dodge",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
