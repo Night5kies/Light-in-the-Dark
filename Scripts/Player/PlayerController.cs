@@ -19,7 +19,6 @@ public class PlayerController : MonoBehaviour
     public float gravity;
     float groundedGravity = -0.05f;
 
-    public float turnSpeed;
     float turnSmoothVelocity;
     float targetAngle;
     public float turnTime;
@@ -27,15 +26,25 @@ public class PlayerController : MonoBehaviour
     float yVel;
 
     bool movementInputGiven;
+    bool running;
 
     bool grounded;
-    bool running;
     bool jumpPressed;
     bool jumping;
+    public float jumpCD;
+    float jumpCDCounter = 0;
+    bool canJump = false;
+
+
     bool leftClick;
     bool rightClick;
     bool isFixed;
+
     bool dodgePressed;
+    bool dodging;
+    public float dodgeCD;
+    float dodgeCDCounter = 0;
+    bool canDodge = false;
 
     Vector2 movementInput;
     Vector3 desiredMovement;
@@ -66,20 +75,19 @@ public class PlayerController : MonoBehaviour
         playerInput.PlayerControls.Movement.canceled += AssignMovementInput;
         playerInput.PlayerControls.Movement.performed += AssignMovementInput;
 
-        playerInput.PlayerControls.Dodge.started += inp => { dodgePressed = inp.ReadValueAsButton(); };
-        playerInput.PlayerControls.Dodge.canceled += inp => { dodgePressed = inp.ReadValueAsButton(); };
 
         playerInput.PlayerControls.Run.started += inp => { running = inp.ReadValueAsButton(); };
         playerInput.PlayerControls.Run.canceled += inp => { running = inp.ReadValueAsButton(); };
 
-        playerInput.PlayerControls.Jump.started += inp => { jumpPressed = inp.ReadValueAsButton(); };
-        playerInput.PlayerControls.Jump.canceled += inp => { jumpPressed = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Dodge.started += inp => { Dodge(); };
 
-        playerInput.PlayerControls.Attack.started += inp => { leftClick = inp.ReadValueAsButton(); };
-        playerInput.PlayerControls.Attack.canceled += inp => { leftClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Jump.started += inp => { Jump(); };
 
-        playerInput.PlayerControls.Block.started += inp => { rightClick = inp.ReadValueAsButton(); };
-        playerInput.PlayerControls.Block.canceled += inp => { rightClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Attack.started += inp => { SwingSword(); };//leftClick = inp.ReadValueAsButton(); };
+        //playerInput.PlayerControls.Attack.canceled += inp => { leftClick = inp.ReadValueAsButton(); };
+
+        playerInput.PlayerControls.Block.started += inp => { RaiseShield(); };//rightClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Block.canceled += inp => { LowerShield(); };//rightClick = inp.ReadValueAsButton(); };
 
 
     }
@@ -98,72 +106,129 @@ public class PlayerController : MonoBehaviour
     }
 
 
+    private void RaiseShield()
+    {
+        if (!dodging && !isFixed && grounded)
+        {
+            isFixed = true;
+            animator.SetBool("isBlocking", true);
+        }
+    }
+
+    private void LowerShield()
+    {
+        animator.SetBool("isBlocking", false);
+    }
+
+    public void ShieldRaised()
+    {
+        blocking = true;
+    }
+    public void ShieldLowered()
+    {
+        blocking = false;
+        isFixed = false;
+    }
+
+    private void SwingSword()
+    {
+        if (!dodging && !isFixed && grounded)
+        {
+            animator.SetTrigger("Attack");
+            isFixed = true;
+        }
+    }
+
+    public void EndOfSwordSwing()
+    {
+        isFixed = false;
+    }
+
+
+
+
+    public void damaged(float damage, Vector3 location)
+    {
+        angleToEnemy = Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg;
+        if (angleToEnemy < 0)
+        {
+            angleToEnemy += 360;
+        }
+        if (!blocking || !(Mathf.Abs(transform.eulerAngles.y - (Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg)) <= blockAngle))
+        {
+            health -= damage;
+        }
+    }
+
+
+    private void Dodge()
+    {
+        if (canDodge)
+        {
+            animator.SetTrigger("Dodge");
+            dodging = true;
+            canDodge = false;
+        }       
+    }
+
+    public void EndOfDodge()
+    {
+        dodging = false;
+
+    }
+
+
+    private void Jump()
+    {
+        if (!isFixed && grounded && canJump && !dodging)
+        {
+            jumping = true;
+            canJump = false;
+            desiredMovement.y = jumpVel;
+            animator.SetBool("isJumping", true);
+            animator.SetTrigger("Jump");
+        }
+    }
+
+
+    
+
+
+
+
     void Update()
     {
+        if (health <= 0)
+        {
+            Debug.Log("YOU DIED");
+        }
         //DISPLAY HEALTH
         HealthDisplay.text = health.ToString();
-
-
-        //ATTACKING AND BLOCKING
-        if (animator.GetCurrentAnimatorStateInfo(0).IsName("Raise Shield") || animator.GetCurrentAnimatorStateInfo(0).IsName("Lower Shield"))
-        {
-            isFixed = true;
-            if (rightClick)
-            {
-                blocking = true;
-                animator.SetBool("isBlocking", true);
-            }
-            else
-            {
-                blocking = false;
-                animator.SetBool("isBlocking", false);
-            }
-        }
-        else if (animator.GetCurrentAnimatorStateInfo(0).IsName("Sword Slash"))
-        {
-            isFixed = true;
-        }
-
-        else
-        {
-            isFixed = false;
-            if (leftClick)
-            {
-                animator.SetBool("isAttacking", true);
-            }
-            else
-            {
-                animator.SetBool("isAttacking", false);
-            }
-            if (rightClick)
-            {
-                animator.SetBool("isBlocking", true);
-            }
-            else
-            {
-                animator.SetBool("isBlocking", false);
-            }
-        }
-
 
         desiredMovement.x = 0;
         desiredMovement.z = 0;
         yVel = desiredMovement.y;
 
-
         //MOVEMENT
-        if (!isFixed)
+        
+        if (!dodging && !isFixed)
         {
-            if (dodgePressed)
-            {
-                animator.SetTrigger("Dodge");
-                isFixed = true;
-            }
             if (movementInputGiven)
             {
                 targetAngle = Mathf.Atan2(movementInput.x, movementInput.y) * Mathf.Rad2Deg + cam.transform.eulerAngles.y;
 
-                turnTime = Mathf.Abs(targetAngle - transform.eulerAngles.y) / turnSpeed;
+                float heading = transform.eulerAngles.y;
+
+                if (targetAngle < 0)
+                {
+                    targetAngle += 360;
+                }
+                if (heading < 0)
+                {
+                    heading += 360;
+                }
+
+
                 animator.SetBool("isWalking", true);
                 if (running)
                 {
@@ -183,27 +248,24 @@ public class PlayerController : MonoBehaviour
             }
             if (transform.eulerAngles.y != targetAngle)
             {
+                //ROTATION
                 float angle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnTime);
                 transform.rotation = Quaternion.Euler(0, angle, 0);
             }
-
-
         }
         else
         {
             animator.SetBool("isRunning", false);
             animator.SetBool("isWalking", false);
         }
+        
+
+
+
         desiredMovement.y = yVel;
 
 
         characterController.Move(desiredMovement * Time.deltaTime);
-
-
-        //ROTATION
-        
-
-
 
 
         //GRAVITY
@@ -218,41 +280,46 @@ public class PlayerController : MonoBehaviour
             desiredMovement.y += gravity * Time.deltaTime;
         }
 
-        //JUMPING
-        if (jumpPressed && !jumping && grounded)
+        //JUMPING CD
+
+        if (!jumping)
         {
-            jumping = true;
-            desiredMovement.y = jumpVel;
-            animator.SetBool("isJumping", true);
+            if (!canJump && jumpCDCounter >= jumpCD)
+            {
+                canJump = true;
+            }
+            else if (!canJump && jumpCDCounter < jumpCD)
+            {
+                jumpCDCounter += Time.deltaTime;
+            }
         }
-        else if (grounded && jumping)
+        else if (grounded)
         {
+            jumpCDCounter = 0;
             jumping = false;
             animator.SetBool("isJumping", false);
         }
+
+        //DOGING CD
+        if (!dodging)
+        {
+            if (!canDodge)
+            {
+                if (dodgeCDCounter >= dodgeCD)
+                {
+                    canDodge = true;
+                    dodgeCDCounter = 0;
+                }
+                else if (dodgeCDCounter < dodgeCD)
+                {
+                    dodgeCDCounter += Time.deltaTime;
+                }
+            }
+            
+        }
     }
 
-    public void damaged(float damage, Vector3 location)
-    {
-        angleToEnemy = Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg;
-        if (angleToEnemy < 0)
-        {
-            angleToEnemy += 360;
-        }
-        Debug.Log(angleToEnemy + ", " + transform.eulerAngles.y);
-        if (!blocking || !(Mathf.Abs(transform.eulerAngles.y-(Mathf.Atan2(location.x - transform.position.x, location.z - transform.position.z) * Mathf.Rad2Deg)) <= blockAngle))
-        {
-            health -= damage;
-        }
-    }
-
-
-
-
-
-
-
-
+    
 
 
     void OnEnable()
