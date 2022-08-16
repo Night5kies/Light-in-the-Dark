@@ -83,7 +83,7 @@ public class PlayerController : MonoBehaviour
 
         playerInput.PlayerControls.Jump.started += inp => { Jump(); };
 
-        playerInput.PlayerControls.Attack.started += inp => { SwingSword(); };//leftClick = inp.ReadValueAsButton(); };
+        playerInput.PlayerControls.Attack.started += inp => { SwingSword(); Debug.Log("SWING"); };//leftClick = inp.ReadValueAsButton(); };
         //playerInput.PlayerControls.Attack.canceled += inp => { leftClick = inp.ReadValueAsButton(); };
 
         playerInput.PlayerControls.Block.started += inp => { RaiseShield(); };//rightClick = inp.ReadValueAsButton(); };
@@ -132,6 +132,7 @@ public class PlayerController : MonoBehaviour
 
     private void SwingSword()
     {
+        Debug.Log(dodging + ", " + isFixed + ", "+ grounded);
         if (!dodging && !isFixed && grounded)
         {
             animator.SetTrigger("Attack");
